@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using ExploringAzureFunctionsApp.Models;
@@ -9,6 +10,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace ExploringAzureFunctionsApp;
 
@@ -23,13 +25,13 @@ public class CreatePost
 
     [FunctionName("CreatePost")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "Create post" })]
-    [OpenApiParameter(name: "title", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Title** parameter")]
-    [OpenApiParameter(name: "content", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Content** parameter")]
-    [OpenApiParameter(name: "published", In = ParameterLocation.Query, Required = true, Type = typeof(bool), Description = "The **Published** parameter")]
+    //[OpenApiParameter(name: "title", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Title** parameter")]
+    //[OpenApiParameter(name: "content", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Content** parameter")]
+    //[OpenApiParameter(name: "published", In = ParameterLocation.Query, Required = true, Type = typeof(bool), Description = "The **Published** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
-        HttpRequest httpRequest,
+        HttpRequest req,
         [CosmosDB(
             databaseName: "ExploringAzureDBTest",
             collectionName: "ExploringAzureContainerTest",
@@ -38,21 +40,26 @@ public class CreatePost
     {
         _logger.LogInformation($"C# HTTP trigger function processed a request. Function name: {nameof(CreatePost)}");
 
-        string title = httpRequest.Query["title"];
-        string content = httpRequest.Query["content"];
-        bool published = bool.Parse(httpRequest.Query["published"]);
+        string name = req.Query["name"];
+        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        name = name ?? data?.name;
 
-        Post postToCreate = new()
-        {
-            // Create a random ID.
-            Id = Guid.NewGuid().ToString(),
-            Title = title,
-            Content = content,
-            Published = published
-        };
+        //string title = httpRequest.Query["title"];
+        //string content = httpRequest.Query["content"];
+        //bool published = bool.Parse(httpRequest.Query["published"]);
 
-        // Add a JSON document to the output container.
-        await documentsOut.AddAsync(postToCreate);
+        //Post postToCreate = new()
+        //{
+        //    // Create a random ID.
+        //    Id = Guid.NewGuid().ToString(),
+        //    Title = title,
+        //    Content = content,
+        //    Published = published
+        //};
+
+        // add a json document to the output container.
+        //await documentsout.addasync(posttocreate);
 
         string responseMessage = "Function triggered successfully. If the data was clean, the post has been created.";
 
