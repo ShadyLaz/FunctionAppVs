@@ -2,7 +2,7 @@
 
 namespace ExploringAzureFunctionsApp.Models;
 
-internal class Post
+public class Post
 {
     [JsonProperty(PropertyName = "id")]
     public string Id { get; set; }
