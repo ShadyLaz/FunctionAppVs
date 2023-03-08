@@ -13,14 +13,14 @@ using System.Net;
 
 namespace FunctionApp1FromVs
 {
-    public static class Addefunc
+    public static class CreateWithBody
     {
-        [FunctionName("Addefunc")]
+        [FunctionName("CreateWithBody")]
         [OpenApiOperation(operationId: "Run", tags: new[] { "Create post" })]
         [OpenApiRequestBody("application/json", typeof(Post),
-            Description = "JSON request body containing { hours, capacity}")]
+        Description = "JSON request body containing { Title, Content, Published}")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string),
-            Description = "The OK response message containing a JSON result.")]
+        Description = "The OK response message containing a JSON result.")]
         public static async Task<IActionResult> Run( [HttpTrigger(AuthorizationLevel.Anonymous, "post")] Post body,
              [CosmosDB(
              databaseName: "ExploringAzureDBTest",
